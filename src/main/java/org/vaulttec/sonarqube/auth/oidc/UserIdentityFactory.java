@@ -84,6 +84,17 @@ public class UserIdentityFactory {
   }
 
   private String getName(UserInfo userInfo) {
+    String nameClaim = config.nameStrategyClaimName();
+    if(nameClaim != null && nameClaim.trim().length() > 0) {
+      String customName = userInfo.getStringClaim(nameClaim);
+      if (customName == null) {
+        throw new IllegalStateException(
+            "Name claim '" + config.nameStrategyClaimName() + "' is missing in user info - "
+                + "make sure your OIDC provider supports this claim in the id token or at the user info endpoint");
+      }
+      return customName;
+    }
+
     String name = userInfo.getName() != null ? userInfo.getName() : userInfo.getPreferredUsername();
     if (name == null) {
       throw new IllegalStateException("Claims 'name' and 'preferred_username' are missing in user info - "

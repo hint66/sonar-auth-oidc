@@ -37,7 +37,7 @@ public class AuthOidcPluginTest {
     Plugin.Context context = new PluginContextImpl.Builder().setSonarRuntime(runtime).build();
     underTest.define(context);
 
-    assertThat(context.getExtensions()).hasSize(20);
+    assertThat(context.getExtensions()).hasSize(21);
   }
 
   @Test

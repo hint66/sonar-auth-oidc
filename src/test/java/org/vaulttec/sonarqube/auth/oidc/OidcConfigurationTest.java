@@ -122,6 +122,12 @@ public class OidcConfigurationTest {
   }
 
   @Test
+  public void name_claim() {
+    settings.setProperty(OidcConfiguration.NAME_STRATEGY_CLAIM_NAME, "name");
+    assertThat(underTest.nameStrategyClaimName()).isEqualTo("name");
+  }
+
+  @Test
   public void group_sync() {
     settings.setProperty(OidcConfiguration.GROUPS_SYNC, "true");
     assertThat(underTest.syncGroups()).isTrue();
@@ -163,7 +169,7 @@ public class OidcConfigurationTest {
 
   @Test
   public void definitions() {
-    assertThat(OidcConfiguration.definitions()).hasSize(15);
+    assertThat(OidcConfiguration.definitions()).hasSize(16);
   }
 
   @Test
