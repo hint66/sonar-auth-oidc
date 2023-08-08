@@ -74,6 +74,9 @@ public class OidcConfiguration {
   static final String NAME_STRATEGY_CLAIM = "Name claim";
   static final String NAME_STRATEGY_CLAIM_NAME = NAME_STRATEGY + ".claim";
 
+  static final String UPDATE_OID_PROPS_STRATEGY = PREFIX + ".oidUserUpdate";
+  static final String UPDATE_OID_PROPS_LABEL = "Update user properties from OpenID";
+
   static final String GROUPS_SYNC = PREFIX + ".groupsSync";
   static final String GROUPS_SYNC_CLAIM_NAME = PREFIX + ".groupsSync.claimName";
   private static final String GROUPS_SYNC_CLAIM_NAME_DEFAULT_VALUE = "groups";
@@ -147,6 +150,10 @@ public class OidcConfiguration {
 
   public String nameStrategyClaimName() {
     return config.get(NAME_STRATEGY_CLAIM_NAME).orElse(null);
+  }
+
+  public boolean updateOidPropsName() {
+    return config.getBoolean(UPDATE_OID_PROPS_STRATEGY).orElse(true);
   }
 
   public boolean syncGroups() {
@@ -227,6 +234,9 @@ public class OidcConfiguration {
             .description("Name of the claim to use for the user name. If not set, will use the default behavior of OIDC.")
             .category(CATEGORY).subCategory(SUBCATEGORY).type(STRING)
             .index(index++).build(),
+        PropertyDefinition.builder(UPDATE_OID_PROPS_STRATEGY).name("Update properties from OIDC")
+            .description("If set to true, each time the user do login, its properties are updated from OIDC")
+            .category(CATEGORY).subCategory(SUBCATEGORY).type(BOOLEAN).defaultValue(valueOf(true)).index(index++).build(),
         PropertyDefinition.builder(GROUPS_SYNC).name("Synchronize groups")
             .description("For each of his Open ID Connect userinfo groups claim entries,"
                 + " the user will be associated to a group with the same name (if it exists) in SonarQube.")

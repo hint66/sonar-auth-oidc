@@ -128,6 +128,12 @@ public class OidcConfigurationTest {
   }
 
   @Test
+  public void update_oid_props() {
+    settings.setProperty(OidcConfiguration.UPDATE_OID_PROPS_STRATEGY, false);
+    assertThat(underTest.updateOidPropsName()).isEqualTo(false);
+  }
+
+  @Test
   public void group_sync() {
     settings.setProperty(OidcConfiguration.GROUPS_SYNC, "true");
     assertThat(underTest.syncGroups()).isTrue();
@@ -169,7 +175,7 @@ public class OidcConfigurationTest {
 
   @Test
   public void definitions() {
-    assertThat(OidcConfiguration.definitions()).hasSize(16);
+    assertThat(OidcConfiguration.definitions()).hasSize(17);
   }
 
   @Test

@@ -26,7 +26,7 @@ public class AuthOidcPlugin implements Plugin {
   public void define(Context context) {
     if (context.getRuntime().getSonarQubeSide() == SonarQubeSide.SERVER) {
       context.addExtensions(OidcConfiguration.class, OidcClient.class, OidcIdentityProvider.class,
-          UserIdentityFactory.class, AutoLoginFilter.class);
+          UserIdentityFactory.class, AutoLoginFilter.class, UserPropertiesService.class);
       context.addExtensions(OidcConfiguration.definitions());
     }
   }
