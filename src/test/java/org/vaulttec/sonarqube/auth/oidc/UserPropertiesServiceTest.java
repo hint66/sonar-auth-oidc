@@ -42,6 +42,7 @@ import org.mockito.MockitoAnnotations;
 import org.sonar.api.CoreProperties;
 import org.sonar.api.config.Configuration;
 import org.sonar.api.web.ServletFilter;
+import org.vaulttec.sonarqube.api.UserApiWebservice;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -127,7 +128,9 @@ public class UserPropertiesServiceTest extends AbstractOidcTest {
 		Configuration configurationMock = mock(Configuration.class);
 		when(configurationMock.getBoolean( OidcConfiguration.ENABLED))
 				.thenReturn(Optional.of(true));
-		when(configurationMock.getBoolean(OidcConfiguration.UPDATE_OID_PROPS_STRATEGY))
+		when(configurationMock.getBoolean(OidcConfiguration.OIDC_USER_SYNC))
+				.thenReturn(Optional.of(false));
+		when(configurationMock.getBoolean(OidcConfiguration.UPDATE_OID_PROPS))
 				.thenReturn(Optional.of(false));
 
 		when(configurationMock.get(OidcConfiguration.ISSUER_URI))
@@ -137,7 +140,7 @@ public class UserPropertiesServiceTest extends AbstractOidcTest {
 
 		when(configurationMock.get(CoreProperties.SERVER_BASE_URL)).thenReturn(Optional.of(SONAR_URL));
 
-		UserPropertiesService service = new UserPropertiesService(new OidcConfiguration(configurationMock));
+		UserApiWebservice service = new UserApiWebservice(new OidcConfiguration(configurationMock));
 
 		HttpServletRequest request = mock(HttpServletRequest.class, RETURNS_DEEP_STUBS);
 		when(request.getRequestURL()).thenReturn(new StringBuffer(SONAR_URL + "/userapi/"));

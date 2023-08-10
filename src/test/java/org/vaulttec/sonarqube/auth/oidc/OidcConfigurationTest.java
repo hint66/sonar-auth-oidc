@@ -129,8 +129,14 @@ public class OidcConfigurationTest {
 
   @Test
   public void update_oid_props() {
-    settings.setProperty(OidcConfiguration.UPDATE_OID_PROPS_STRATEGY, false);
+    settings.setProperty(OidcConfiguration.UPDATE_OID_PROPS, false);
     assertThat(underTest.updateOidPropsName()).isEqualTo(false);
+  }
+
+  @Test
+  public void oidc_user_sync() {
+    settings.setProperty(OidcConfiguration.OIDC_USER_SYNC, false);
+    assertThat(underTest.overwriteUserInfoFromOidc()).isEqualTo(false);
   }
 
   @Test

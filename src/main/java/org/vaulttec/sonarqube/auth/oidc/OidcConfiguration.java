@@ -67,6 +67,13 @@ public class OidcConfiguration {
   static final String LOGIN_STRATEGY_CUSTOM_CLAIM = "Custom claim";
   static final String LOGIN_STRATEGY_DEFAULT_VALUE = LOGIN_STRATEGY_PREFERRED_USERNAME;
 
+  /**
+   * Auto create a new user from identity provider in Sonarqube
+   */
+  static final String OIDC_USER_SYNC = PREFIX + ".userSync";
+  static final String OIDC_USER_SYNC_LABEL = "Synchronize user information from OIDC";
+  static final boolean OIDC_USER_SYNC_DEFAULT = true;
+
   static final String LOGIN_STRATEGY_CUSTOM_CLAIM_NAME = PREFIX + ".loginStrategy.customClaim.name";
   private static final String LOGIN_STRATEGY_CUSTOM_CLAIM_NAME_DEFAULT_VALUE = "upn";
 
@@ -74,7 +81,7 @@ public class OidcConfiguration {
   static final String NAME_STRATEGY_CLAIM = "Name claim";
   static final String NAME_STRATEGY_CLAIM_NAME = NAME_STRATEGY + ".claim";
 
-  static final String UPDATE_OID_PROPS_STRATEGY = PREFIX + ".oidUserUpdate";
+  static final String UPDATE_OID_PROPS = PREFIX + ".oidUserUpdate";
   static final String UPDATE_OID_PROPS_LABEL = "Update user properties from OpenID";
 
   static final String GROUPS_SYNC = PREFIX + ".groupsSync";
@@ -153,7 +160,11 @@ public class OidcConfiguration {
   }
 
   public boolean updateOidPropsName() {
-    return config.getBoolean(UPDATE_OID_PROPS_STRATEGY).orElse(true);
+    return config.getBoolean(UPDATE_OID_PROPS).orElse(true);
+  }
+
+  public boolean overwriteUserInfoFromOidc() {
+    return config.getBoolean(OIDC_USER_SYNC).orElse(OIDC_USER_SYNC_DEFAULT);
   }
 
   public boolean syncGroups() {
@@ -234,7 +245,10 @@ public class OidcConfiguration {
             .description("Name of the claim to use for the user name. If not set, will use the default behavior of OIDC.")
             .category(CATEGORY).subCategory(SUBCATEGORY).type(STRING)
             .index(index++).build(),
-        PropertyDefinition.builder(UPDATE_OID_PROPS_STRATEGY).name("Update properties from OIDC")
+        PropertyDefinition.builder(OIDC_USER_SYNC).name(OIDC_USER_SYNC_LABEL)
+            .description("If set to true, each time the user is connected to Sonar, user information is updated from OIDC.")
+            .category(CATEGORY).subCategory(SUBCATEGORY).type(BOOLEAN).defaultValue(valueOf(OIDC_USER_SYNC_DEFAULT)).index(index++).build(),
+        PropertyDefinition.builder(UPDATE_OID_PROPS).name(UPDATE_OID_PROPS_LABEL)
             .description("If set to true, each time the user do login, its properties are updated from OIDC")
             .category(CATEGORY).subCategory(SUBCATEGORY).type(BOOLEAN).defaultValue(valueOf(true)).index(index++).build(),
         PropertyDefinition.builder(GROUPS_SYNC).name("Synchronize groups")

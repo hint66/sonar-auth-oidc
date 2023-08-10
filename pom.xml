@@ -142,19 +142,13 @@
 			<version>${sonar-plugin-api.version}</version>
 			<scope>provided</scope>
 		</dependency>
-
+<!-- https://mvnrepository.com/artifact/org.sonarsource.sonarqube/sonar-core -->
 		<dependency>
 			<groupId>org.sonarsource.sonarqube</groupId>
-			<artifactId>sonar-db-core</artifactId>
-			<version>${sonar-plugin-api.version}</version>
-			<scope>provided</scope>
-			<exclusions>
-				<exclusion>  <!-- declare the exclusion here -->
-					<groupId>org.sonarsource.sonarqube</groupId>
-					<artifactId>sonar-process</artifactId>
-				</exclusion>
-			</exclusions>
+			<artifactId>sonar-core</artifactId>
+			<version>8.9.9.56886</version>
 		</dependency>
+
 
 		<dependency>
 			<groupId>com.nimbusds</groupId>
