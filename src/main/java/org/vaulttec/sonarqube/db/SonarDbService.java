@@ -36,7 +36,9 @@ public class SonarDbService {
 
 	public SonarDbService() {
 
-		LOGGER.info("SonarDbService: constructor");
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("SonarDbService: constructor");
+		}
 
 		try (InputStream input = new FileInputStream("./conf/sonar.properties")) {
 
@@ -47,7 +49,9 @@ public class SonarDbService {
 			dbUser = sonarProperties.getProperty("sonar.jdbc.username");
 			dbPassword = sonarProperties.getProperty("sonar.jdbc.password");
 			dbUrl = sonarProperties.getProperty("sonar.jdbc.url");
-			LOGGER.info("SonarDbService: JDBC URL : {}", dbUrl);
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.info("SonarDbService: JDBC URL : {}", dbUrl);
+			}
 
 		} catch (IOException e) {
 			LOGGER.error("Error while fetching sonar properties - CANNOT USE DATABASE !", e);
@@ -137,180 +141,20 @@ public class SonarDbService {
 						.setName(rs.getString("name"))
 						.setProviderId(rs.getString("external_id")).build();
 
-				LOGGER.info("User found : {}", userIdentity);
+				if (LOGGER.isDebugEnabled()) {
+					LOGGER.debug("User found : {}", userIdentity);
+				}
 				return userIdentity;
 			}
 
-			LOGGER.info("User \"{}\" not found", externalLogin);
 			// Not found
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("User \"{}\" not found", externalLogin);
+			}
 			return null;
 		} catch (SQLException e) {
 			throw new Exception("Error while finding user " + externalLogin, e);
 		}
 	}
-
-
-	/**
-	 * Creates a user in database
-	 *
-	 * @param login            the user's login
-	 * @param name             the user's full name
-	 * @param email            the user's e-mail
-	 * @param externalLogin    the user's external Login
-	 * @param identityProvider the identity provider (ex : OIDC)
-	 * @throws Exception if the update failed
-	 */
-	public void createUser(String login, String name, String email, String externalLogin, String identityProvider)
-			throws Exception {
-
-		// Check if the user exists first
-
-
-
-		// Create user
-		String query = "INSERT INTO users (uuid, login, name, email, external_login, external_identity_provider, external_id, is_root, user_local, onboarded, reset_password) "
-		+ " VALUES (?, ?, ?, ?, ?, ?, ?, false, false, false, false)";
-		// Values for the update
-		try (Connection connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
-				PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-			// Set the values for the update query
-			// Generates uuid
-			String uuid =  new UuidGeneratorImpl().generate().toString();
-
-			preparedStatement.setString(1, uuid);
-			preparedStatement.setString(2, login);
-			preparedStatement.setString(3, name);
-			preparedStatement.setString(4, email);
-			preparedStatement.setString(5, login);
-			preparedStatement.setString(6, identityProvider);
-			preparedStatement.setString(7, login);
-
-			// Execute the update
-			int rowsUpdated = preparedStatement.executeUpdate();
-
-			// Check if the update was successful
-			if (rowsUpdated > 0) {
-				LOGGER.info("createUser:Used added successfully for {}", login);
-
-				// Set groups for user
-				List<String> defaultGroupsList = Arrays.asList("sonar-users");
-				Map<String, String> groups = listGroups(connection);
-				defaultGroupsList.forEach(groupName -> {
-					// Find and add group
-					String groupId = groups.get(groupName);
-					if (groupId != null) {
-						// Group found -> Add to user
-						try {
-							addGroupWithUserUuid(uuid, groupId, connection);
-						} catch (Exception e) {
-							LOGGER.error("Error while adding group for user", e);
-						}
-					}
-				});
-
-			} else {
-				throw new Exception("Insert failed for " + login);
-			}
-		} catch (Exception e) {
-			throw new Exception("Error while creating user " + login + " : " + e.getMessage(), e);
-		}
-	}
-
-	/**
-	 * Add a group for the user UUID.
-	 *
-	 * @param userUuid   the user uuid
-	 * @param groupUuid  the group uuid
-	 * @param connection the database connection
-	 * @throws Exception
-	 */
-	private void addGroupWithUserUuid(String userUuid, String groupUuid, Connection connection) throws Exception {
-
-		// Create user
-		String query = "INSERT INTO groups_users (group_uuid, user_uuid) VALUES (?, ?)";
-		// Values for the update
-		try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-
-			preparedStatement.setString(1, groupUuid);
-			preparedStatement.setString(2, userUuid);
-
-			// Execute the update
-			int rowsUpdated = preparedStatement.executeUpdate();
-
-			// Check if the update was successful
-			if (rowsUpdated > 0) {
-				LOGGER.info("addGroupWithUserUuid: Group {} added successfully for user {}", groupUuid, userUuid);
-
-			} else {
-				throw new Exception("Insert failed for group " + groupUuid + " and user "  + userUuid);
-			}
-		} catch (SQLException e) {
-			throw new Exception("Error while adding group  " + groupUuid + " for user " + userUuid, e);
-		}
-	}
-
-	/**
-	 * List all sonar groups from database and return them into a map.
-	 * @param connection the current db connection
-	 * @return a list of sonar groups
-	 * @throws Exception if there was a problem
-	 */
-	private Map<String, String> listGroups(Connection connection) throws Exception {
-		Map<String, String> groups = new HashMap<>();
-
-
-		String query = "SELECT * FROM groups ORDER BY name ASC";
-
-		// Values for the update
-		try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-			// Set the values for the update query
-			ResultSet rs = preparedStatement.executeQuery();
-			while (rs.next()) {
-				groups.put(rs.getString("name"), rs.getString("uuid"));
-
-			}
-
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("Sonar groups found : {}", groups);
-
-			}
-			return groups;
-		} catch (SQLException e) {
-			throw new Exception("Error while finding sonar groups", e);
-		}
-
-	}
-
-	/**
-	 * Change status for user (enabled/disabled).
-	 * @param externalLogin
-	 * @param identityProvider
-	 * @param isActive
-	 * @throws Exception
-	 */
-	public void changeActiveStatus(String externalLogin, String identityProvider, boolean isActive)
-			throws Exception {
-
-		// Check first if the user is at the same status ?
-
-		String updateQuery = "UPDATE users SET active = ? WHERE external_identity_provider = ? and external_login = ?";
-		// Values for the update
-		try (Connection connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
-				PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
-			// Set the values for the update query
-			preparedStatement.setBoolean(1, isActive);
-			preparedStatement.setString(2, identityProvider);
-			preparedStatement.setString(3, externalLogin);
-
-			// Execute the update
-			preparedStatement.executeUpdate();
-
-			// Check if the update was successful
-
-		} catch (SQLException e) {
-			throw new Exception("Error while updating user " + externalLogin, e);
-		}
-	}
-
 
 }

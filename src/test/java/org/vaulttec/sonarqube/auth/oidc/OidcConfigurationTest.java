@@ -18,6 +18,7 @@
 package org.vaulttec.sonarqube.auth.oidc;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.vaulttec.sonarqube.auth.oidc.OidcConfiguration.ID_TOKEN_SIG_ALG_RSA;
 import static org.vaulttec.sonarqube.auth.oidc.OidcConfiguration.LOGIN_STRATEGY_PREFERRED_USERNAME;
 import static org.vaulttec.sonarqube.auth.oidc.OidcConfiguration.LOGIN_STRATEGY_PROVIDER_ID;
@@ -26,13 +27,15 @@ import org.junit.Test;
 import org.sonar.api.CoreProperties;
 import org.sonar.api.config.PropertyDefinitions;
 import org.sonar.api.config.internal.MapSettings;
+import org.sonar.api.utils.System2;
 
 public class OidcConfigurationTest {
 
   private static final String SONAR_URL = "https://sonar.acme.com";
   private static final String AUTH_URL = "https://auth.acme.com";
 
-  private MapSettings settings = new MapSettings(new PropertyDefinitions(OidcConfiguration.definitions()));
+  private final System2 system2 = mock(System2.class);
+  private MapSettings settings = new MapSettings(new PropertyDefinitions(system2, OidcConfiguration.definitions()));
   private OidcConfiguration underTest = new OidcConfiguration(settings.asConfig());
 
   @Test
@@ -181,7 +184,7 @@ public class OidcConfigurationTest {
 
   @Test
   public void definitions() {
-    assertThat(OidcConfiguration.definitions()).hasSize(17);
+    assertThat(OidcConfiguration.definitions()).hasSize(18);
   }
 
   @Test

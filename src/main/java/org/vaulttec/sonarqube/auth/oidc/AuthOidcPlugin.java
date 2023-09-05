@@ -21,6 +21,7 @@ import org.sonar.api.Plugin;
 import org.sonar.api.SonarQubeSide;
 import org.vaulttec.sonarqube.api.UserApiWebservice;
 
+
 public class AuthOidcPlugin implements Plugin {
 
   @Override

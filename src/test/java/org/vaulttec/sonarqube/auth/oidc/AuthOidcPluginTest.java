@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
 import org.sonar.api.Plugin;
+import org.sonar.api.SonarEdition;
 import org.sonar.api.SonarQubeSide;
 import org.sonar.api.SonarRuntime;
 import org.sonar.api.internal.PluginContextImpl;
@@ -33,16 +34,16 @@ public class AuthOidcPluginTest {
 
   @Test
   public void test_server_side_extensions() throws Exception {
-    SonarRuntime runtime = SonarRuntimeImpl.forSonarQube(Version.create(7, 6), SonarQubeSide.SERVER);
+    SonarRuntime runtime = SonarRuntimeImpl.forSonarQube(Version.create(9, 1), SonarQubeSide.SERVER, SonarEdition.COMMUNITY);
     Plugin.Context context = new PluginContextImpl.Builder().setSonarRuntime(runtime).build();
     underTest.define(context);
 
-    assertThat(context.getExtensions()).hasSize(23);
+    assertThat(context.getExtensions()).hasSize(24);
   }
 
   @Test
   public void test_scnner_side_extensions() throws Exception {
-    SonarRuntime runtime = SonarRuntimeImpl.forSonarQube(Version.create(7, 6), SonarQubeSide.SCANNER);
+    SonarRuntime runtime = SonarRuntimeImpl.forSonarQube(Version.create(9, 1), SonarQubeSide.SCANNER, SonarEdition.COMMUNITY);
     Plugin.Context context = new PluginContextImpl.Builder().setSonarRuntime(runtime).build();
     underTest.define(context);
 

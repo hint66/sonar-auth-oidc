@@ -95,7 +95,9 @@ public class OidcIdentityProvider implements OAuth2IdentityProvider {
 
     // If auto create is not enabled. Refuse user if he does not currently exist in database
     if (Boolean.FALSE.equals(config.overwriteUserInfoFromOidc())) {
-      LOGGER.info("Verifing if user exists in Sonar {}", userIdentity.getProviderLogin());
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Verifing if user exists in Sonar {}", userIdentity.getProviderLogin());
+      }
       // Check user
       try {
         UserIdentity userFound = SonarDbService.getInstance().findUserByExternalLogin(userIdentity.getProviderLogin(), KEY);
@@ -117,7 +119,7 @@ public class OidcIdentityProvider implements OAuth2IdentityProvider {
         throw new IllegalStateException("Error while verifing user " + userIdentity.getProviderLogin() + " in database", e);
       }
     }
-
+ 
     LOGGER.debug("Authenticating user '{}' with groups {}", userIdentity.getProviderLogin(), userIdentity.getGroups());
     context.authenticate(userIdentity);
     LOGGER.trace("Redirecting to requested page");
