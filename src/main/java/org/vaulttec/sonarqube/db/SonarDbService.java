@@ -29,10 +29,6 @@ public class SonarDbService {
 	private static final Logger LOGGER = Loggers.get(SonarDbService.class);
 	private static final SonarDbService INSTANCE = new SonarDbService();
 
-	Properties sonarProperties;
-	private String dbUser;
-	private String dbPassword;
-	private String dbUrl;
 
 	public SonarDbService() {
 
@@ -40,22 +36,6 @@ public class SonarDbService {
 			LOGGER.debug("SonarDbService: constructor");
 		}
 
-		try (InputStream input = new FileInputStream("./conf/sonar.properties")) {
-
-			sonarProperties = new Properties();
-			// load a properties file
-			sonarProperties.load(input);
-
-			dbUser = sonarProperties.getProperty("sonar.jdbc.username");
-			dbPassword = sonarProperties.getProperty("sonar.jdbc.password");
-			dbUrl = sonarProperties.getProperty("sonar.jdbc.url");
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.info("SonarDbService: JDBC URL : {}", dbUrl);
-			}
-
-		} catch (IOException e) {
-			LOGGER.error("Error while fetching sonar properties - CANNOT USE DATABASE !", e);
-		}
 
 		// Force loading Postgresql class.
 		// If we don't we have this issue :
@@ -90,7 +70,7 @@ public class SonarDbService {
 
 		String updateQuery = "UPDATE users SET name = ?, email = ?, login = ? WHERE external_identity_provider = ? and external_login = ?";
 		// Values for the update
-		try (Connection connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+		try (Connection connection = SonarDataSource.getConnection();
 				PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
 			// Set the values for the update query
 			preparedStatement.setString(1, name);
@@ -129,7 +109,7 @@ public class SonarDbService {
 
 		String query = "SELECT * FROM users WHERE external_identity_provider = ? and external_login = ?";
 		// Values for the update
-		try (Connection connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+		try (Connection connection = SonarDataSource.getConnection();
 				PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 			// Set the values for the update query
 			preparedStatement.setString(1, identityProvider);
