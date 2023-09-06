@@ -19,6 +19,8 @@ package org.vaulttec.sonarqube.auth.oidc;
 
 import org.sonar.api.Plugin;
 import org.sonar.api.SonarQubeSide;
+import org.vaulttec.sonarqube.api.UserApiWebservice;
+
 
 public class AuthOidcPlugin implements Plugin {
 
@@ -26,7 +28,7 @@ public class AuthOidcPlugin implements Plugin {
   public void define(Context context) {
     if (context.getRuntime().getSonarQubeSide() == SonarQubeSide.SERVER) {
       context.addExtensions(OidcConfiguration.class, OidcClient.class, OidcIdentityProvider.class,
-          UserIdentityFactory.class, AutoLoginFilter.class);
+          UserIdentityFactory.class, AutoLoginFilter.class, UserApiWebservice.class);
       context.addExtensions(OidcConfiguration.definitions());
     }
   }

@@ -23,16 +23,19 @@ import org.junit.Test;
 import org.sonar.api.config.PropertyDefinitions;
 import org.sonar.api.config.internal.MapSettings;
 import org.sonar.api.server.authentication.UserIdentity;
+import org.sonar.api.utils.System2;
 
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 public class UserIdentityFactoryTest {
 
-  MapSettings settings = new MapSettings(new PropertyDefinitions(OidcConfiguration.definitions()));
+	private final System2 system2 = mock(System2.class);
+  MapSettings settings = new MapSettings(new PropertyDefinitions(system2, OidcConfiguration.definitions()));
   UserIdentityFactory underTest = new UserIdentityFactory(new OidcConfiguration(settings.asConfig()));
 
   @Test

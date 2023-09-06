@@ -143,7 +143,9 @@ public class OidcClient {
       userInfo = ((UserInfoSuccessResponse) userInfoResponse).getUserInfo();
     }
 
-    LOGGER.debug("User info: {}", userInfo.toJSONObject());
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("User info: {}", userInfo.toJSONObject());
+    }
     return userInfo;
   }
 

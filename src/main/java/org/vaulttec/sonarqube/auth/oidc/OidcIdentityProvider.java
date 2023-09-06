@@ -23,6 +23,7 @@ import org.sonar.api.server.authentication.OAuth2IdentityProvider;
 import org.sonar.api.server.authentication.UserIdentity;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
+import org.vaulttec.sonarqube.db.SonarDbService;
 
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
@@ -87,7 +88,38 @@ public class OidcIdentityProvider implements OAuth2IdentityProvider {
     context.verifyCsrfState();
     AuthorizationCode authorizationCode = client.getAuthorizationCode(context.getRequest());
     UserInfo userInfo = client.getUserInfo(authorizationCode, context.getCallbackUrl());
+
+	// Do not change properties for user
+
     UserIdentity userIdentity = userIdentityFactory.create(userInfo);
+
+    // If auto create is not enabled. Refuse user if he does not currently exist in database
+    if (Boolean.FALSE.equals(config.overwriteUserInfoFromOidc())) {
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Verifing if user exists in Sonar {}", userIdentity.getProviderLogin());
+      }
+      // Check user
+      try {
+        UserIdentity userFound = SonarDbService.getInstance().findUserByExternalLogin(userIdentity.getProviderLogin(), KEY);
+        if (userFound == null) {
+          // User not found !!
+          // Redirect to login
+          throw new IllegalStateException("User not found in Sonar : " + userIdentity.getProviderLogin());
+        }
+        // Rebuild if sync groups
+
+        userIdentity = UserIdentity.builder().setProviderLogin(userFound.getProviderLogin())
+        		.setEmail(userFound.getEmail())
+                .setName(userFound.getName())
+        		.setProviderId(userIdentity.getProviderId()).build(); // Keep original ID
+
+
+      } catch (Exception e) {
+        // Error while finding, throw login error
+        throw new IllegalStateException("Error while verifing user " + userIdentity.getProviderLogin() + " in database", e);
+      }
+    }
+ 
     LOGGER.debug("Authenticating user '{}' with groups {}", userIdentity.getProviderLogin(), userIdentity.getGroups());
     context.authenticate(userIdentity);
     LOGGER.trace("Redirecting to requested page");

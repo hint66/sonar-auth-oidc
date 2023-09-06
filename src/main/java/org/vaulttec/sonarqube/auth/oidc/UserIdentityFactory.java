@@ -41,8 +41,9 @@ public class UserIdentityFactory {
   }
 
   public UserIdentity create(UserInfo userInfo) {
-    UserIdentity.Builder builder = UserIdentity.builder().setProviderId(userInfo.getSubject().getValue())
-        .setProviderLogin(getLogin(userInfo)).setName(getName(userInfo)).setEmail(userInfo.getEmailAddress());
+    UserIdentity.Builder builder = UserIdentity.builder().setProviderId(getLogin(userInfo))
+        .setProviderLogin(getLogin(userInfo))
+		.setName(getName(userInfo)).setEmail(userInfo.getEmailAddress());
     if (config.syncGroups()) {
       builder.setGroups(getGroups(userInfo));
     }
